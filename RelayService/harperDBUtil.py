@@ -35,6 +35,22 @@ def getInsertPayload(table, photonID, location, location_prob):
 
     return json.dumps(payload)
 
+def getLogsInsertPayload(table, photonID, fingerprint):
+    payload = {}
+    payload["operation"] = "insert"
+    payload["schema"] = "track"
+    payload["table"] = table
+
+    records = []
+    record = {}
+    record["photon_id"] = photonID
+    record["fingerprint"] = fingerprint
+    record["timestamp"] = str(datetime.datetime.now())
+    records.append(record)
+    payload["records"] = records
+
+    return json.dumps(payload)
+
 def getPatientInfo():
     payload = getSelectPayload()
     headers = getHeaders()
@@ -44,6 +60,12 @@ def getPatientInfo():
 
 def postLocation(photonID, location, location_prob):
     payload = getInsertPayload("photon_location", photonID, location, location_prob)
+    headers = getHeaders()
+    response = requests.request("POST", HDB_URL, data=payload, headers=headers)
+    print(response.text)
+
+def postFindLogs(photonID, fingerprint):
+    payload = getLogsInsertPayload("find_logs", photonID, fingerprint)
     headers = getHeaders()
     response = requests.request("POST", HDB_URL, data=payload, headers=headers)
     print(response.text)
